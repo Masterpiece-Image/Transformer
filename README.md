@@ -1,9 +1,9 @@
 # Transformer
 
-Feature to implement :
+Feature to implement for IDT :
 
 - [ ] Input Projection
-- [ ] LN
+- [ ] IDT Block
 - [ ] LeFF
 - [ ] W-REMSA
 - [ ] S-REMSA
