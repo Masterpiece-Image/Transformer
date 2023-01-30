@@ -11,3 +11,4 @@ Feature to implement :
 - [ ] database reading
 - [ ] loss
 - [ ] validation
+- [ ] evaluation metrics
