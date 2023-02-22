@@ -13,7 +13,7 @@ class LinearProj(nn.Module) :
         # Wq and Wk have the same dim : Dx * Dk and Wv and Wp have the same dim : Dx * Dz
         # But to reduce the calculation time the windows are taken as square so Dk = Dz
         # Moreover, for calculation of k, v and p the originals authors have introduced an
-        # attenuation factor that is why we end up with 2 nn.Linear function here.
+        # attenuation factor that is why we end up with 2 nn.Linear function here instead of one.
         self.linear_to_q    = nn.Linear(dim, self.inner_dim, bias=bias)     # Input of size (H*W)*Dx and output of size (H*W)*inner_dim
         self.linear_to_kvp  = nn.Linear(dim, self.inner_dim*3, bias=bias)   # Input of size (H*W)*Dx and 3 outputs of size (H*W)*inner_dim
 

@@ -3,6 +3,7 @@ import torch.nn as nn
 
 from LinearProj import LinearProj as LP
 from utils.trunc import trunc_normal_
+from einops import repeat
 ######################### REMSA #########################
 #   x belong to R(H, W, Dx)
 class REMSA(nn.Module) :
@@ -62,7 +63,41 @@ class REMSA(nn.Module) :
         trunc_normal_(self.relative_position_bias, std=.02)
         self.softmax = nn.Softmax(dim=-1)
     
-    def forward(self, x) :
+    def forward(self, x, attn_kv=None, mask=None) :
+
+        # 0 - Init 
+        H, W, Dx= x.shape # H * W = window dim, Dx = token dim
+
+        # 1 - Linear Proj in fig 3.
+        q, k, v, p = self.qkvp(x, attn_kv) # attn_kv attenuation factor
         
+        # 2 - first matmul in fig 3. with the scale operation
+        q = q * self.scale
+        A = (q @ k.transpose(-2, -1))
+
+        # 3 - Relative Position Bias in fig 3.
+        relative_position_bias = self.relative_position_bias[self.relative_position_index.view(-1)].view(
+            self.win_size[0] * self.win_size[1], self.win_size[0] * self.win_size[1], -1
+        ) # dim = Wh*Ww,Wh*Ww,nH
+        relative_position_bias = relative_position_bias.permute(2, 0, 1).contiguous() # dim = nH,Wh*Ww,Wh*Ww
+        ratio = A.size(-1) // relative_position_bias.size(-1)
+        relative_position_bias = repeat(relative_position_bias, 'nH l c -> nH l (c d)', d=ratio)
+        A += relative_position_bias.unsqueeze(0)
+
+        # 4 - softmax operation in fig 3.
+        if mask is not None :
+            nW = mask.shape
+            mask = repeat(mask, 'nW l n -> nW m (n d)', d=ratio)
+            A = A.view(H // nW, nW, self.num_heads, W, W * ratio) + mask.unsqueeze(1).unsqueeze(0)
+            A = A.view(-1, self.num_heads, W, W * ratio)
+        A = self.softmax(A)
+
+        # 5 - Depth-wise conv on tokens and token-wise linear proj from fig 3.
+        Position = self.Position_Extract(p).reshape(H, Dx, W).transpose(-2, -1)
+
+        # 6 - Last matmul of fig 3 and Final operation of fig 3. sum the two sums
+        x = ((A @ v)).transpose(1, 2).reshape(H, W, Dx) + Position
+
+        x = self.proj(x)
         return x
 
