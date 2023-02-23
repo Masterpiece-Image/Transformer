@@ -6,8 +6,8 @@ Feature implemented for IDT :
 - [ ] IDT Block
 - [ ] LeFF
 - [x] REMSA
-- [ ] W-REMSA
-- [ ] S-REMSA
+- [ ] WTM
+- [ ] STM
 - [ ] Output Projection
 - [ ] database reading
 - [ ] loss

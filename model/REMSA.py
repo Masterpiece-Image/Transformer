@@ -100,4 +100,3 @@ class REMSA(nn.Module) :
 
         x = self.proj(x)
         return x
-
