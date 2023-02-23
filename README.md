@@ -4,7 +4,7 @@ Feature implemented for IDT :
 
 - [ ] Input Projection
 - [ ] IDT Block
-- [ ] LeFF
+- [x] LeFF
 - [x] REMSA
 - [ ] WTM
 - [ ] STM
