@@ -2,13 +2,13 @@
 
 Feature implemented for IDT :
 
-- [ ] Input Projection
+- [x] Input Projection
 - [ ] IDT Block
 - [x] LeFF
 - [x] REMSA
 - [x] WTM
 - [ ] STM
-- [ ] Output Projection
+- [x] Output Projection
 - [ ] database reading
 - [ ] loss
 - [ ] validation
