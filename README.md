@@ -1,5 +1,7 @@
 # Transformer
 
+Reconstruction of the model of [Image Deraining Transformer](https://github.com/jiexiaou/IDT)
+
 Feature implemented for IDT :
 
 - [x] Input Projection
