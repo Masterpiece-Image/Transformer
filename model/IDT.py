@@ -6,6 +6,46 @@ import OutputProj
 from TransformerModule import *
 from timm.models.layers import DropPath, to_2tuple, trunc_normal_
 
+# Downsample Block
+# Changing x dim from in_channel to out_channel usin a convolution
+class Downsample(nn.Module):
+    def __init__(self, in_channel, out_channel):
+        super(Downsample, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(in_channel, out_channel, kernel_size=4, stride=2, padding=1),
+        )
+        self.in_channel = in_channel
+        self.out_channel = out_channel
+
+    def forward(self, x):
+        B, L, C = x.shape # Block, Line, Column
+        # import pdb;pdb.set_trace()
+        H = int(math.sqrt(L))
+        W = int(math.sqrt(L))
+        x = x.transpose(1, 2).contiguous().view(B, C, H, W)
+        out = self.conv(x).flatten(2).transpose(1, 2).contiguous()  # B H*W C
+        return out
+
+
+# Upsample Block
+# Changing x shape from in_channel to out_channel using a deconvolution
+class Upsample(nn.Module):
+    def __init__(self, in_channel, out_channel):
+        super(Upsample, self).__init__()
+        self.deconv = nn.Sequential(
+            nn.ConvTranspose2d(in_channel, out_channel, kernel_size=2, stride=2),
+        )
+        self.in_channel = in_channel
+        self.out_channel = out_channel
+
+    def forward(self, x):
+        B, L, C = x.shape # Block, Line, Column
+        H = int(math.sqrt(L))
+        W = int(math.sqrt(L))
+        x = x.transpose(1, 2).contiguous().view(B, C, H, W)
+        out = self.deconv(x).flatten(2).transpose(1, 2).contiguous()  # B H*W C
+        return out
+
 
 ## Creating num WTM block and one STM block if USE_CROSS
 class BasicIDTLayer(nn.Module):
@@ -248,18 +288,22 @@ class IDT(nn.Module):
 
         # Decoder
         up0 = self.upsample_0(bottle) #16x16 256
+        # Skip connection
         decoder0 = torch.cat([up0, encoder3], -1) #16x16 512
         decoder0 = self.decoderlayer_0(decoder0, mask=mask) #16x16 512
 
         up1 = self.upsample_1(decoder0) #32x32 128
+        # Skip connection
         decoder1 = torch.cat([up1, encoder2], -1) #32x32 256
         decoder1 = self.decoderlayer_1(decoder1, mask=mask) #32x32 256
 
         up2 = self.upsample_2(decoder1) #64x64 64
+        # Skip connection
         decoder2 = torch.cat([up2, encoder1], -1) #64x64 128
         decoder2 = self.decoderlayer_2(decoder2, mask=mask) #64x64 128
 
         up3 = self.upsample_3(decoder2) #128x128 32
+        # Skip connection
         decoder3 = torch.cat([up3, encoder0], -1) #128x128 64
         decoder3 = self.decoderlayer_3(decoder3, mask=mask)
 
