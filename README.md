@@ -5,7 +5,6 @@ Reconstruction of the model of [Image Deraining Transformer](https://github.com/
 Feature implemented for IDT :
 
 - [x] Input Projection
-- [ ] IDT Block
 - [x] LeFF
 - [x] REMSA
 - [x] WTM
