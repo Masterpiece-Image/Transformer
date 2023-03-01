@@ -11,6 +11,6 @@ Feature implemented for IDT :
 - [ ] STM
 - [x] Output Projection
 - [ ] database reading
-- [ ] loss
+- [x] loss
 - [ ] validation
 - [ ] evaluation metrics
